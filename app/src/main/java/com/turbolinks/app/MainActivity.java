@@ -1,9 +1,13 @@
 package com.turbolinks.app;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.content.pm.PackageManager;
+import android.Manifest;
 
 import com.basecamp.turbolinks.TurbolinksView;
 import com.turbolinks.app.Helper.TurbolinksHelper;
@@ -25,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private String path = "";
     private Boolean isModal = false;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,11 +39,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
-
-
         isModal = getIntent().hasExtra(MODAL_WINDOW);
-
-
 
         if (getSupportActionBar() != null && isModal){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -57,10 +55,8 @@ public class MainActivity extends AppCompatActivity {
         turbolinksHelper = new TurbolinksHelper(this, this, turbolinksView, isModal);
         turbolinksHelper.visit(location + path);
 
-
-
-
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -81,6 +77,5 @@ public class MainActivity extends AppCompatActivity {
 
         turbolinksHelper.visit(location + path, true);
     }
-
 
 }

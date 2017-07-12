@@ -4,11 +4,13 @@ package com.turbolinks.app;
  * Created by markbiegel on 23/1/17.
  */
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +31,11 @@ public class BaseActivity extends TabActivity{
     private String path = "";
     private String token = "";
 
+    private static final String[] INITIAL_PERMS={
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+    };
+    private static final int INITIAL_REQUEST=225;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +47,7 @@ public class BaseActivity extends TabActivity{
             return;
         }
 
+        startLocationTracking();
 
         final TabHost tabHost = getTabHost();
 
@@ -173,6 +181,38 @@ public class BaseActivity extends TabActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
+    }
+
+    public void startLocationTracking() {
+        if (!canAccessLocation()) {
+            Log.e("WAT", "REQUEST PERMS");
+            requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
+        } else {
+
+
+            Log.e("WAT", "LocationListener ");
+            startService(new Intent(this, BGLocationService.class));
+            Log.e("WAT", "START SERVICE ");
+        }
+    }
+
+    private boolean canAccessLocation() {
+        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
+    }
+
+    private boolean hasPermission(String perm) {
+        return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[],
+            int[] grantResults) {
+
+        if (requestCode == INITIAL_REQUEST && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startLocationTracking();
+        }
     }
 
 
