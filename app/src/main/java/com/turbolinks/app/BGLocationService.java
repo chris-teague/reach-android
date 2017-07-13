@@ -11,6 +11,7 @@ package com.turbolinks.app;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -18,12 +19,19 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class BGLocationService extends Service {
 
     private static final String TAG = "BGLocationService";
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 10f;
+    APIInterface apiInterface;
+    public static final String PREFS_NAME = "Credentials";
+
 
     private class LocationListener implements android.location.LocationListener
     {
@@ -40,6 +48,7 @@ public class BGLocationService extends Service {
         {
             Log.e(TAG, "onLocationChanged: " + location);
             mLastLocation.set(location);
+            updateLocation(location);
         }
 
         @Override
@@ -58,6 +67,30 @@ public class BGLocationService extends Service {
         public void onStatusChanged(String provider, int status, Bundle extras)
         {
             Log.e(TAG, "onStatusChanged: " + provider);
+        }
+    }
+
+    public void updateLocation(Location location) {
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        String userId = settings.getString("user-id", "");
+        String userToken = settings.getString("user-token", "");
+
+        if(!userId.isEmpty() && !userToken.isEmpty()) {
+
+            apiInterface = APIClient.getClient().create(APIInterface.class);
+            Call call = apiInterface.updateUser(userId, "patch", Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
+            call.enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) {
+                }
+
+                @Override
+                public void onFailure(Call call, Throwable t) {
+                    call.cancel();
+                }
+
+            });
         }
     }
 

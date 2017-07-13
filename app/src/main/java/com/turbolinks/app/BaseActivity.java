@@ -3,6 +3,7 @@ package com.turbolinks.app;
 /**
  * Created by markbiegel on 23/1/17.
  */
+import com.turbolinks.app.User;
 
 import android.Manifest;
 import android.app.Activity;
@@ -23,13 +24,18 @@ import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TabWidget;
-
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class BaseActivity extends TabActivity{
 
     TabHost tabHost;
     private String path = "";
     private String token = "";
+    APIInterface apiInterface;
+
+    public static final String PREFS_NAME = "Credentials";
 
     private static final String[] INITIAL_PERMS={
             android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -47,8 +53,6 @@ public class BaseActivity extends TabActivity{
             return;
         }
 
-        startLocationTracking();
-
         final TabHost tabHost = getTabHost();
 
         Intent intentHome = new Intent().setClass(this, MainActivity.class);
@@ -58,45 +62,13 @@ public class BaseActivity extends TabActivity{
                 .setIndicator("",getResources().getDrawable(R.drawable.home_active))
                 .setContent(intentHome);
 
-        Intent intentGoogle = new Intent().setClass(this, MainActivity.class);
-        intentGoogle.putExtra("path","google");
-        TabSpec tabSpecGoogle = tabHost
-                .newTabSpec("Google")
-                .setIndicator("", getResources().getDrawable(R.drawable.google))
-                .setContent(intentGoogle);
 
-        Intent intentFirefox = new Intent().setClass(this, MainActivity.class);
-        intentFirefox.putExtra("path","firefox");
-        TabSpec tabSpecFirefox = tabHost
-                .newTabSpec("Firefox")
-                .setIndicator("",getResources().getDrawable(R.drawable.firefox))
-                .setContent(intentFirefox);
-
-        Intent intentSafari = new Intent().setClass(this, MainActivity.class);
-        intentSafari.putExtra("path","safari");
-        TabSpec tabSpecSafari = tabHost
-                .newTabSpec("Safari")
-                .setIndicator("",getResources().getDrawable(R.drawable.safari))
-                .setContent(intentSafari);
-
-        Intent intentIceCat = new Intent().setClass(this, MainActivity.class);
-        intentIceCat.putExtra("path","icecat");
-        TabSpec tabSpecIceCat = tabHost
-                .newTabSpec("IcaCat")
-                .setIndicator("",getResources().getDrawable(R.drawable.icecat))
-                .setContent(intentIceCat);
 
         // add all tabs
         tabHost.addTab(tabSpecHome);
-        tabHost.addTab(tabSpecGoogle);
-        tabHost.addTab(tabSpecFirefox);
-        tabHost.addTab(tabSpecSafari);
-        tabHost.addTab(tabSpecIceCat);
 
         //set Windows tab as default (zero based)
         tabHost.setCurrentTab(0);
-
-
 
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener(){
             @Override
@@ -108,6 +80,8 @@ public class BaseActivity extends TabActivity{
                 }
             }});
 
+        handleUser();
+        trackLocation();
     }
 
     private void resetTabIcons(Integer tabId){
@@ -158,10 +132,7 @@ public class BaseActivity extends TabActivity{
             case 4:
                 tabImage.setImageDrawable(getResources().getDrawable(R.drawable.icecat_active));
                 break;
-
         }
-
-
     }
 
     @Override
@@ -183,16 +154,59 @@ public class BaseActivity extends TabActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    public void startLocationTracking() {
+//
+// User handling
+//
+
+    public void handleUser() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        String userId = settings.getString("user-id", "");
+        String userToken = settings.getString("user-token", "");
+
+        if(!userId.isEmpty() && !userToken.isEmpty()) {
+            Activity currentActivity = getCurrentActivity();
+            if (currentActivity instanceof MainActivity) {
+                ((MainActivity) currentActivity).setToken(userToken);
+                ((MainActivity) currentActivity).reload();
+            }
+
+        } else {
+            setupUser();
+        }
+    }
+
+    public void setupUser() {
+
+        apiInterface = APIClient.getClient().create(APIInterface.class);
+        Call call = apiInterface.createUser("android");
+        call.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                User user = (User) response.body();
+
+                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("user-id", user.id);
+                editor.putString("user-token", user.token);
+                editor.commit();
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                call.cancel();
+            }
+
+        });
+    }
+
+//
+// Location Tracking related calls
+//
+    public void trackLocation() {
         if (!canAccessLocation()) {
-            Log.e("WAT", "REQUEST PERMS");
             requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
         } else {
-
-
-            Log.e("WAT", "LocationListener ");
             startService(new Intent(this, BGLocationService.class));
-            Log.e("WAT", "START SERVICE ");
         }
     }
 
@@ -211,9 +225,8 @@ public class BaseActivity extends TabActivity{
             int[] grantResults) {
 
         if (requestCode == INITIAL_REQUEST && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startLocationTracking();
+            trackLocation();
         }
     }
-
 
 }
