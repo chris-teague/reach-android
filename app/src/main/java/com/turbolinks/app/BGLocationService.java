@@ -27,8 +27,8 @@ public class BGLocationService extends Service {
 
     private static final String TAG = "BGLocationService";
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000;
-    private static final float LOCATION_DISTANCE = 10f;
+    private static final int LOCATION_INTERVAL = 400;
+    private static final float LOCATION_DISTANCE = 1f;
     APIInterface apiInterface;
     public static final String PREFS_NAME = "Credentials";
 
