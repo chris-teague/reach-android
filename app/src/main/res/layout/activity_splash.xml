@@ -8,21 +8,21 @@
     android:orientation="vertical"
     tools:context="com.turbolinks.app.MainActivity">
 
+    <com.basecamp.turbolinks.TurbolinksView
+        android:id="@+id/nodrawer_turbolinks_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/signindrawer_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:theme="@style/ToolBarStyle"
+        android:visibility="invisible"
         app:elevation="0dp">
 
 
-        </android.support.v7.widget.Toolbar>
-
-    <com.basecamp.turbolinks.TurbolinksView
-        android:id="@+id/nodrawer_turbolinks_view"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent" />
-
+    </android.support.v7.widget.Toolbar>
 
 
 </LinearLayout>

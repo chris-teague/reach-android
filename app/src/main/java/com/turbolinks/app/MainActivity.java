@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements TurbolinksAdapter
 
         WebSettings settings;
         settings = TurbolinksSession.getDefault(getApplicationContext()).getWebView().getSettings();
-
-
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         String pathFromIntent = getIntent().getStringExtra("path");

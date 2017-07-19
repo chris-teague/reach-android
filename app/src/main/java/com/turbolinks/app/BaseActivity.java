@@ -62,14 +62,14 @@ public class BaseActivity extends TabActivity{
                 .setIndicator("",getResources().getDrawable(R.drawable.home_active))
                 .setContent(intentHome);
 
-
-
         // add all tabs
         tabHost.addTab(tabSpecHome);
 
         //set Windows tab as default (zero based)
         tabHost.setCurrentTab(0);
 
+
+        // TODO: clear out the tab related stuff, this isn't needed for this app
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener(){
             @Override
             public void onTabChanged(String tabId) {
@@ -110,8 +110,6 @@ public class BaseActivity extends TabActivity{
         tabViewGroup = (ViewGroup) getTabWidget().getChildAt(4);
         tabImage  = (ImageView) tabViewGroup.getChildAt(0);
         tabImage.setImageDrawable(getResources().getDrawable(R.drawable.icecat));
-
-
 
 
         tabViewGroup = (ViewGroup) getTabWidget().getChildAt(tabId);
