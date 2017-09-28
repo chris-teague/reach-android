@@ -64,13 +64,13 @@ public class MainActivity extends AppCompatActivity implements TurbolinksAdapter
             path = getIntent().getStringExtra("path");
         }
 
-        Log.d("PATHC", path);
-        if(path.indexOf("locations") != -1) {
-            Log.d("CLIPPYC", path);
+        location = getIntent().hasExtra(INTENT_URL) ? getIntent().getStringExtra(INTENT_URL) : getString(R.string.base_url);
+
+        if(location.indexOf("locations") != -1) {
+            Log.d("CLIPPYC", location);
             copyLink(location + path);
         }
 
-        location = getIntent().hasExtra(INTENT_URL) ? getIntent().getStringExtra(INTENT_URL) : getString(R.string.base_url);
         turbolinksHelper = new TurbolinksHelper(this, this, turbolinksView, isModal);
         turbolinksHelper.visit(location + path);
 
@@ -92,13 +92,6 @@ public class MainActivity extends AppCompatActivity implements TurbolinksAdapter
             newPath = path + "?userToken="+userToken;
         }
 
-        Log.d("PATH", path);
-        if(path.indexOf("locations") != -1) {
-            Log.d("CLIPPY", path);
-
-            copyLink(location + path);
-        }
-
         turbolinksHelper.visit(location + newPath, true);
     }
 
@@ -116,14 +109,12 @@ public class MainActivity extends AppCompatActivity implements TurbolinksAdapter
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d("RESTART", "MEOW");
 
         turbolinksHelper.visit(location + path, true);
     }
 
     @Override
     public void onPageFinished() {
-
     }
 
     @Override
@@ -146,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements TurbolinksAdapter
 
     @Override
     public void visitCompleted() {
-        Log.d("LOC", "CMPLETED");
+
     }
 
     @Override
