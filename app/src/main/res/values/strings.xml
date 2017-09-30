@@ -1,3 +1,4 @@
 <resources>
     <string name="base_url">https://pdd-reach.herokuapp.com/</string>
+    <string name="app_name">Reach</string>
 </resources>
